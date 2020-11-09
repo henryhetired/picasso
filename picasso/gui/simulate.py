@@ -196,7 +196,7 @@ class Window(QtWidgets.QMainWindow):
         paint_groupbox = QtWidgets.QGroupBox("PAINT parameters")
         pgrid = QtWidgets.QGridLayout(paint_groupbox)
 
-        kon = QtWidgets.QLabel("k<sub>On</sub>")
+        kon = QtWidgets.QLabel("k<sub>On</sub>") #On time for imager binding event
         imagerconcentration = QtWidgets.QLabel("Imager concentration")
         taud = QtWidgets.QLabel("Dark time")
         taub = QtWidgets.QLabel("Bright time")
