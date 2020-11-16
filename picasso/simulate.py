@@ -69,7 +69,10 @@ def noisy_p(image, mu):
 
 
 def check_type(movie):
-    movie[movie >= (2 ** 16) - 1] = (2 ** 16) - 1
+    """
+    # Helper function to clip data and guarantee usigned 16bit integer
+    """
+    movie[movie >= (2 ** 16) - 1] = (2 ** 16) - 1 # Clip movie values to be 16bit
     movie = movie.astype("<u2")  # little-endian 16-bit unsigned int
     return movie
 
@@ -77,10 +80,19 @@ def check_type(movie):
 def paintgen(
     meandark, meanbright, frames, time, photonrate, photonratestd, photonbudget
 ):
-    """
-    Paint-Generator:
-    Generates on and off-traces for given parameters.
-    Calculates the number of Photons in each frame for a binding site.
+    """Generate traces for PAINT imaging stacks
+
+    Args:
+        meandark (float): mean dark time of binding events
+        meanbright (float): mean bright time of binding events
+        frames (integer): number of frames in the stack
+        time (float): exposure time for each frame
+        photonrate (float): Rate of photon reaching sensor
+        photonratestd (float): standard deviation of the photon rate
+        photonbudget (integer): Limits on how much photon can arrive during an exposure (helper function)
+
+    Returns:
+        photonsinframe, timetrace, spotkinetics
     """
     meanlocs = 4 * int(
         _np.ceil(frames * time / (meandark + meanbright))
@@ -88,16 +100,20 @@ def paintgen(
     if meanlocs < 10:
         meanlocs = meanlocs * 10
 
+    # List of on/off times from exponential distributions
     dark_times = _np.random.exponential(meandark, meanlocs)
     bright_times = _np.random.exponential(meanbright, meanlocs)
 
+    # Interweave dark_times and bright_times [dt,bt,dt,bt..]
     events = _np.vstack((dark_times, bright_times)).reshape(
         (-1,), order="F"
-    )  # Interweave dark_times and bright_times [dt,bt,dt,bt..]
+    )  
     eventsum = _np.cumsum(events)
+
+    # Find the first event that exceeds the total integration time
     maxloc = _np.argmax(
         eventsum > (frames * time)
-    )  # Find the first event that exceeds the total integration time
+    )  
     simulatedmeandark = _np.mean(events[:maxloc:2])
 
     simulatedmeanbright = _np.mean(events[1:maxloc:2])
@@ -109,9 +125,10 @@ def paintgen(
         onevents = int(maxloc / 2)
     bright_events = _np.floor(maxloc / 2)  # number of bright_events
 
+    # an on-event might be longer than the movie, so allocate more memory
     photonsinframe = _np.zeros(
         int(frames + _np.ceil(meanbright / time * 20))
-    )  # an on-event might be longer than the movie, so allocate more memory
+    )  
 
     # calculate photon numbers
     for i in range(1, maxloc, 2):
@@ -224,16 +241,28 @@ def distphotons(
     photonratestd,
     photonbudget,
 ):
+    """Distribute photons according to structure
+
+    Args:
+        structures ([type]): [description]
+        itime ([type]): [description]
+        frames ([type]): [description]
+        taud ([type]): [description]
+        taub ([type]): [description]
+        photonrate ([type]): [description]
+        photonratestd ([type]): [description]
+        photonbudget ([type]): [description]
+
+    Returns:
+        [type]: [description]
     """
-    Distrbute Photons
-    """
-    time = itime
-    meandark = int(taud)
-    meanbright = int(taub)
+    time = itime #integration time
+    meandark = int(taud) #average dark time
+    meanbright = int(taub) #average bright time
 
     bindingsitesx = structures[0, :]
     bindingsitesy = structures[1, :]
-    nosites = len(bindingsitesx)
+    nosites = len(bindingsitesx) #number of binding sites
 
     photonposall = _np.zeros((2, 0))
     photonposall = [1, 1]
