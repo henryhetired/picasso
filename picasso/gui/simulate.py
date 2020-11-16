@@ -1139,12 +1139,11 @@ class Window(QtWidgets.QMainWindow):
                 timetrace = {}
 
                 for i in range(0, nosites):
-                    p_temp, t_temp, k_temp = simulate.distphotons(
-                        partstruct,
-                        itime,
+                    p_temp, t_temp, k_temp = simulate.paintgen(
+                        int(taud),
+                        int(taub),
                         frames,
-                        taud,
-                        taub,
+                        itime,
                         photonrate,
                         photonratestd,
                         photonbudget,

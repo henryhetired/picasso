@@ -78,8 +78,7 @@ def check_type(movie):
 
 
 def paintgen(
-    meandark, meanbright, frames, time, photonrate, photonratestd, photonbudget
-):
+    meandark, meanbright, frames, time, photonrate, photonratestd, photonbudget):
     """Generate traces for PAINT imaging stacks
 
     Args:
@@ -229,56 +228,6 @@ def paintgen(
     else:
         spotkinetics = [0, sum(photonsinframe > 0), 0, 0]
     return photonsinframe, timetrace, spotkinetics
-
-
-def distphotons(
-    structures,
-    itime,
-    frames,
-    taud,
-    taub,
-    photonrate,
-    photonratestd,
-    photonbudget,
-):
-    """Distribute photons according to structure
-
-    Args:
-        structures ([type]): [description]
-        itime ([type]): [description]
-        frames ([type]): [description]
-        taud ([type]): [description]
-        taub ([type]): [description]
-        photonrate ([type]): [description]
-        photonratestd ([type]): [description]
-        photonbudget ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
-    time = itime #integration time
-    meandark = int(taud) #average dark time
-    meanbright = int(taub) #average bright time
-
-    bindingsitesx = structures[0, :]
-    bindingsitesy = structures[1, :]
-    nosites = len(bindingsitesx) #number of binding sites
-
-    photonposall = _np.zeros((2, 0))
-    photonposall = [1, 1]
-
-    photonsinframe, timetrace, spotkinetics = paintgen(
-        meandark,
-        meanbright,
-        frames,
-        time,
-        photonrate,
-        photonratestd,
-        photonbudget,
-    )
-
-    return photonsinframe, timetrace, spotkinetics
-
 
 def distphotonsxy(runner, photondist, structures, psf, mode3Dstate, cx, cy):
 
